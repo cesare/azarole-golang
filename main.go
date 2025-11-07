@@ -1,6 +1,7 @@
 package main
 
 import (
+	config "azarole/internal"
 	"flag"
 	"fmt"
 	"os"
@@ -20,5 +21,10 @@ func newArguments() *arguments {
 
 func main() {
 	args := newArguments()
-	fmt.Fprintf(os.Stdout, "configPath: %s\n", args.configPath)
+	config, err := config.LoadConfig(args.configPath)
+	if err != nil {
+		os.Exit(111)
+	}
+
+	fmt.Fprintf(os.Stdout, "config.app.BaseUrl: %s\n", config.App.BaseUrl)
 }
