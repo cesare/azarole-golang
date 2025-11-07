@@ -35,9 +35,15 @@ func main() {
 		os.Exit(111)
 	}
 
+	secrets, err := app.LoadSecrets()
+	if err != nil {
+		slog.Error("Failed to load secrets", "error", err)
+		os.Exit(111)
+	}
+
 	setupLogger()
 
-	engine, err := app.Engine(config)
+	engine, err := app.Engine(config, secrets)
 	if err != nil {
 		slog.Error("Failed to build engine", "error", err)
 		os.Exit(111)
