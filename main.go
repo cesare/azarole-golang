@@ -1,7 +1,7 @@
 package main
 
 import (
-	config "azarole/internal"
+	app "azarole/internal"
 	"flag"
 	"log/slog"
 	"os"
@@ -29,7 +29,7 @@ func setupLogger() {
 
 func main() {
 	args := newArguments()
-	config, err := config.LoadConfig(args.configPath)
+	config, err := app.LoadConfig(args.configPath)
 	if err != nil {
 		slog.Error("Failed to load config", "error", err)
 		os.Exit(111)
