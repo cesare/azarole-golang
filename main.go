@@ -37,4 +37,12 @@ func main() {
 
 	setupLogger()
 	slog.Debug("Config loaded", "app.BaseUrl", config.App.BaseUrl)
+
+	engine, err := app.Engine(config)
+	if err != nil {
+		slog.Error("Failed to build engine", "error", err)
+		os.Exit(111)
+	}
+
+	engine.Run(config.Server.BindAddress())
 }

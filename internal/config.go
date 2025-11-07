@@ -24,6 +24,10 @@ type ServerConfig struct {
 	Port uint16
 }
 
+func (c *ServerConfig) BindAddress() string {
+	return fmt.Sprintf("%s:%d", c.Bind, c.Port)
+}
+
 type Config struct {
 	App      AppConfig
 	Database DatabaseConfig
