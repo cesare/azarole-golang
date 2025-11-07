@@ -36,7 +36,6 @@ func main() {
 	}
 
 	setupLogger()
-	slog.Debug("Config loaded", "app.BaseUrl", config.App.BaseUrl)
 
 	engine, err := app.Engine(config)
 	if err != nil {
