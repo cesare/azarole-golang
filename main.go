@@ -3,7 +3,7 @@ package main
 import (
 	config "azarole/internal"
 	"flag"
-	"fmt"
+	"log/slog"
 	"os"
 )
 
@@ -19,12 +19,22 @@ func newArguments() *arguments {
 	return &arguments{configPath: configPath}
 }
 
+func setupLogger() {
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+	handler := slog.NewTextHandler(os.Stdout, opts)
+	slog.SetDefault(slog.New(handler))
+}
+
 func main() {
 	args := newArguments()
 	config, err := config.LoadConfig(args.configPath)
 	if err != nil {
+		slog.Error("Failed to load config", "error", err)
 		os.Exit(111)
 	}
 
-	fmt.Fprintf(os.Stdout, "config.app.BaseUrl: %s\n", config.App.BaseUrl)
+	setupLogger()
+	slog.Debug("Config loaded", "app.BaseUrl", config.App.BaseUrl)
 }
