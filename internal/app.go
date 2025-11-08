@@ -8,8 +8,8 @@ import (
 )
 
 type Application struct {
-	Config  Config
-	Secrets Secrets
+	Config  *Config
+	Secrets *Secrets
 
 	database *sql.DB
 }
@@ -35,8 +35,8 @@ func LoadApplication(configPath string) (*Application, error) {
 	}
 
 	app := Application{
-		Config:   *config,
-		Secrets:  *secrets,
+		Config:   config,
+		Secrets:  secrets,
 		database: db,
 	}
 	return &app, nil
