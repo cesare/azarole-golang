@@ -9,14 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Engine(config *Config, secrets *Secrets) (*gin.Engine, error) {
+func Engine(application *Application) *gin.Engine {
 	engine := gin.Default()
 
-	store := cookie.NewStore(secrets.Session.SessionKey.Bytes())
+	store := cookie.NewStore(application.Secrets.Session.SessionKey.Bytes())
 	engine.Use(sessions.Sessions("azarole-session", store))
 
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins: []string{config.Frontend.BaseUrl},
+		AllowOrigins: []string{application.Config.Frontend.BaseUrl},
 		AllowMethods: []string{"DELETE", "GET", "OPTIONS", "POST"},
 		AllowHeaders: []string{
 			"Content-Type",
@@ -26,5 +26,5 @@ func Engine(config *Config, secrets *Secrets) (*gin.Engine, error) {
 
 	engine.GET("/ping", handlers.PingHandler)
 
-	return engine, nil
+	return engine
 }

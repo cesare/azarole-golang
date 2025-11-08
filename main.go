@@ -29,25 +29,14 @@ func setupLogger() {
 
 func main() {
 	args := newArguments()
-	config, err := app.LoadConfig(args.configPath)
+	application, err := app.LoadApplication(args.configPath)
 	if err != nil {
-		slog.Error("Failed to load config", "error", err)
-		os.Exit(111)
-	}
-
-	secrets, err := app.LoadSecrets()
-	if err != nil {
-		slog.Error("Failed to load secrets", "error", err)
+		slog.Error("Failed to load application", "error", err)
 		os.Exit(111)
 	}
 
 	setupLogger()
 
-	engine, err := app.Engine(config, secrets)
-	if err != nil {
-		slog.Error("Failed to build engine", "error", err)
-		os.Exit(111)
-	}
-
-	engine.Run(config.Server.BindAddress())
+	engine := app.Engine(application)
+	engine.Run(application.Config.Server.BindAddress())
 }
