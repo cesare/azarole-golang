@@ -1,10 +1,30 @@
 package app
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/caarlos0/env/v11"
 )
+
+type b64string struct {
+	bytes []byte
+}
+
+func (b64 *b64string) Bytes() []byte {
+	return b64.bytes
+}
+
+func (b64 *b64string) UnmarshalText(text []byte) error {
+	bytes := make([]byte, len(text))
+	_, err := base64.StdEncoding.Decode(bytes, text)
+	if err != nil {
+		return fmt.Errorf("failed to decode base64 value: %s", err)
+	}
+
+	b64.bytes = bytes
+	return nil
+}
 
 type ApiKeyConfig struct {
 	DigestingSecretKey string `env:"API_KEY_DIGESTING_SECRET_KEY,required"`
@@ -34,7 +54,7 @@ func loadGoogleAuth() (*GoogleAuthConfig, error) {
 }
 
 type SessionConfig struct {
-	SessionKey string `env:"SESSION_KEY,required"`
+	SessionKey b64string `env:"SESSION_KEY,required"`
 }
 
 func loadSession() (*SessionConfig, error) {
