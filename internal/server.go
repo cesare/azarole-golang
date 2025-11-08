@@ -1,6 +1,8 @@
 package app
 
 import (
+	"azarole/internal/handlers"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -21,6 +23,8 @@ func Engine(config *Config, secrets *Secrets) (*gin.Engine, error) {
 		},
 		AllowCredentials: true,
 	}))
+
+	engine.GET("/ping", handlers.PingHandler)
 
 	return engine, nil
 }
