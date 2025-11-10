@@ -1,6 +1,7 @@
-package app
+package server
 
 import (
+	app "azarole/internal"
 	"azarole/internal/handlers"
 
 	"github.com/gin-contrib/cors"
@@ -9,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Engine(application *Application) *gin.Engine {
+func Engine(application *app.Application) *gin.Engine {
 	engine := gin.Default()
 
 	store := cookie.NewStore(application.Secrets.Session.SessionKey.Bytes())

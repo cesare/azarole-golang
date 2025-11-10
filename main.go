@@ -2,6 +2,7 @@ package main
 
 import (
 	app "azarole/internal"
+	"azarole/internal/server"
 	"flag"
 	"log/slog"
 	"os"
@@ -37,6 +38,6 @@ func main() {
 
 	setupLogger()
 
-	engine := app.Engine(application)
+	engine := server.Engine(application)
 	engine.Run(application.Config.Server.BindAddress())
 }
