@@ -4,7 +4,6 @@ import (
 	app "azarole/internal"
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"net/url"
 )
 
@@ -45,11 +44,11 @@ func (generator *AuthorizationRequestGenerator) generateRandomString() string {
 
 func (generator *AuthorizationRequestGenerator) generateRequestUrl(state string, nonce string) string {
 	clientId := generator.application.Secrets.GoogleAuth.ClientId
-	callbackUrl := generator.callbackUrl()
+	redirectkUrl := generator.application.Config.Frontend.AuthRedirectUrl()
 
 	params := url.Values{}
 	params.Set("client_id", clientId)
-	params.Set("redirect_uri", callbackUrl)
+	params.Set("redirect_uri", redirectkUrl)
 	params.Set("response_type", "code")
 	params.Set("scope", "openid email")
 	params.Set("state", state)
@@ -62,9 +61,4 @@ func (generator *AuthorizationRequestGenerator) generateRequestUrl(state string,
 		RawQuery: params.Encode(),
 	}
 	return requestUrl.String()
-}
-
-func (generator *AuthorizationRequestGenerator) callbackUrl() string {
-	baseUrl := generator.application.Config.Frontend.BaseUrl
-	return fmt.Sprintf("%s/signin/callback", baseUrl)
 }

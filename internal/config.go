@@ -19,6 +19,10 @@ type FrontendConfig struct {
 	BaseUrl string `toml:"base_url"`
 }
 
+func (config *FrontendConfig) AuthRedirectUrl() string {
+	return fmt.Sprintf("%s/signin/callback", config.BaseUrl)
+}
+
 type ServerConfig struct {
 	Bind string
 	Port uint16
