@@ -23,7 +23,34 @@ func RegisterAuthHandlers(group *gin.RouterGroup, application *app.Application) 
 		})
 	})
 
+	type callbackParams struct {
+		Code  string `form:"code"`
+		State string `form:"state"`
+		Error string `form:"error"`
+	}
+
 	group.POST("/callback", func(c *gin.Context) {
-		c.Status(http.StatusNoContent)
+		var params callbackParams
+		err := c.ShouldBind(&params)
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		if params.Error != "" {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
+		if params.Code == "" || params.State == "" {
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		handleSuccess(c, params.Code, params.State)
 	})
+}
+
+func handleSuccess(c *gin.Context, code string, state string) {
+	c.Status(http.StatusNoContent)
 }
