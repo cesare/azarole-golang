@@ -26,6 +26,7 @@ func Engine(application *app.Application) *gin.Engine {
 	}))
 
 	engine.GET("/ping", handlers.PingHandler)
+	engine.DELETE("/signout", handlers.SignoutHandler)
 
 	authGroup := engine.Group("/auth/google")
 	handlers.RegisterAuthHandlers(authGroup, application)
