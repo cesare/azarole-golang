@@ -3,6 +3,7 @@ package handlers
 import (
 	app "azarole/internal"
 	"azarole/internal/handlers/auth"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -17,6 +18,7 @@ func RegisterAuthHandlers(group *gin.RouterGroup, application *app.Application) 
 		session := sessions.Default(c)
 		session.Set("google-auth-state", authRequest.State)
 		session.Set("google-auth-nonce", authRequest.Nonce)
+		session.Save()
 
 		c.JSON(http.StatusOK, gin.H{
 			"location": authRequest.RequestUrl,
@@ -47,10 +49,45 @@ func RegisterAuthHandlers(group *gin.RouterGroup, application *app.Application) 
 			return
 		}
 
-		handleSuccess(c, params.Code, params.State)
+		handleSuccess(c, application, params.Code, params.State)
 	})
 }
 
-func handleSuccess(c *gin.Context, code string, state string) {
-	c.Status(http.StatusNoContent)
+func handleSuccess(c *gin.Context, application *app.Application, code string, state string) {
+	session := sessions.Default(c)
+	savedState, _ := session.Get("google-auth-state").(string)
+	savedNonce, _ := session.Get("google-auth-nonce").(string)
+
+	if savedState != state {
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
+	accessTokenRequest := auth.NewAccessTokenRequest(application)
+	accessTokenResponse, err := accessTokenRequest.Execute(code)
+	if err != nil {
+		slog.Debug("accessTokenRequest failed", "error", err)
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
+	verifier := auth.NewIdTokenVerifier(application, accessTokenResponse.IdToken, savedNonce)
+	claims, err := verifier.Verify()
+	if err != nil {
+		slog.Debug("verifier failed", "error", err)
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
+	finder := auth.NewUserFinder(application, claims.Subject)
+	result, err := finder.Execute()
+	if err != nil {
+		slog.Debug("finder failed", "error", err)
+		c.Status((http.StatusUnauthorized))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user_id": result.UserId,
+	})
 }
