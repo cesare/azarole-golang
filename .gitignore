@@ -1,3 +1,5 @@
 /azarole
+/azarole-config.toml
+/azarole.db
 
 .envrc
