@@ -58,6 +58,10 @@ func handleSuccess(c *gin.Context, application *app.Application, code string, st
 	savedState, _ := session.Get("google-auth-state").(string)
 	savedNonce, _ := session.Get("google-auth-nonce").(string)
 
+	session.Delete("google-auth-state")
+	session.Delete("google-auth-nonce")
+	session.Save()
+
 	if savedState != state {
 		c.Status(http.StatusUnauthorized)
 		return
@@ -86,6 +90,9 @@ func handleSuccess(c *gin.Context, application *app.Application, code string, st
 		c.Status((http.StatusUnauthorized))
 		return
 	}
+
+	session.Set("userId", result.UserId)
+	session.Save()
 
 	c.JSON(http.StatusOK, gin.H{
 		"user_id": result.UserId,
