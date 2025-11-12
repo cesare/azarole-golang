@@ -1,7 +1,7 @@
 package auth
 
 import (
-	app "azarole/internal"
+	"azarole/internal/core"
 	"azarole/internal/models"
 	"database/sql"
 	"fmt"
@@ -15,11 +15,11 @@ type FinderResult struct {
 }
 
 type UserFinder struct {
-	application *app.Application
+	application *core.Application
 	identifier  string
 }
 
-func NewUserFinder(application *app.Application, identifier string) *UserFinder {
+func NewUserFinder(application *core.Application, identifier string) *UserFinder {
 	return &UserFinder{
 		application: application,
 		identifier:  identifier,

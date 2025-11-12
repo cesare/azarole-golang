@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	app "azarole/internal"
+	"azarole/internal/core"
 	"azarole/internal/handlers/auth"
 	"log/slog"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterAuthHandlers(group *gin.RouterGroup, application *app.Application) {
+func RegisterAuthHandlers(group *gin.RouterGroup, application *core.Application) {
 	group.POST("", func(c *gin.Context) {
 		generator := auth.NewAuthorizationRequestGenerator(application)
 		authRequest := generator.Generate()
@@ -53,7 +53,7 @@ func RegisterAuthHandlers(group *gin.RouterGroup, application *app.Application) 
 	})
 }
 
-func handleSuccess(c *gin.Context, application *app.Application, code string, state string) {
+func handleSuccess(c *gin.Context, application *core.Application, code string, state string) {
 	session := sessions.Default(c)
 	savedState, _ := session.Get("google-auth-state").(string)
 	savedNonce, _ := session.Get("google-auth-nonce").(string)

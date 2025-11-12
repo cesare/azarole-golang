@@ -1,7 +1,7 @@
 package auth
 
 import (
-	app "azarole/internal"
+	"azarole/internal/core"
 	"crypto/rand"
 	"encoding/base64"
 	"net/url"
@@ -14,10 +14,10 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationRequestGenerator struct {
-	application *app.Application
+	application *core.Application
 }
 
-func NewAuthorizationRequestGenerator(application *app.Application) *AuthorizationRequestGenerator {
+func NewAuthorizationRequestGenerator(application *core.Application) *AuthorizationRequestGenerator {
 	return &AuthorizationRequestGenerator{
 		application: application,
 	}

@@ -1,7 +1,7 @@
 package auth
 
 import (
-	app "azarole/internal"
+	"azarole/internal/core"
 	"fmt"
 
 	"github.com/MicahParks/keyfunc/v3"
@@ -14,12 +14,12 @@ type IdTokenClaims struct {
 }
 
 type IdTokenVerifier struct {
-	application *app.Application
+	application *core.Application
 	token       string
 	nonce       string
 }
 
-func NewIdTokenVerifier(application *app.Application, token string, nonce string) *IdTokenVerifier {
+func NewIdTokenVerifier(application *core.Application, token string, nonce string) *IdTokenVerifier {
 	return &IdTokenVerifier{
 		application: application,
 		token:       token,

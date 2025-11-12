@@ -1,7 +1,7 @@
 package auth
 
 import (
-	app "azarole/internal"
+	"azarole/internal/core"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,14 +10,14 @@ import (
 )
 
 type AccessTokenRequest struct {
-	appplication *app.Application
+	appplication *core.Application
 }
 
 type AccessTokenResponse struct {
 	IdToken string `json:"id_token" binding:"required"`
 }
 
-func NewAccessTokenRequest(application *app.Application) *AccessTokenRequest {
+func NewAccessTokenRequest(application *core.Application) *AccessTokenRequest {
 	return &AccessTokenRequest{
 		appplication: application,
 	}
