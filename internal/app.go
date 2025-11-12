@@ -1,9 +1,11 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -16,6 +18,31 @@ type Application struct {
 
 func (application *Application) Database() *sql.DB {
 	return application.database
+}
+
+func (application *Application) WithTransaction(c *gin.Context, f func(*sql.Tx) error) error {
+	ctx := context.WithoutCancel(c.Request.Context())
+	tx, err := application.Database().BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %s", err)
+	}
+
+	defer func() {
+		p := recover()
+		if p != nil {
+			tx.Rollback()
+			panic(p)
+		}
+
+		if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	err = f(tx)
+	return err
 }
 
 func LoadApplication(configPath string) (*Application, error) {

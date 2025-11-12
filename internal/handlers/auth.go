@@ -80,7 +80,7 @@ func handleSuccess(c *gin.Context, application *app.Application, code string, st
 	}
 
 	finder := auth.NewUserFinder(application, claims.Subject)
-	result, err := finder.Execute()
+	result, err := finder.Execute(c)
 	if err != nil {
 		slog.Debug("finder failed", "error", err)
 		c.Status((http.StatusUnauthorized))
