@@ -10,14 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Engine(application *core.App) *gin.Engine {
+func Engine(app *core.App) *gin.Engine {
 	engine := gin.Default()
 
-	store := cookie.NewStore(application.Secrets.Session.SessionKey.Bytes())
+	store := cookie.NewStore(app.Secrets.Session.SessionKey.Bytes())
 	engine.Use(sessions.Sessions("azarole-session", store))
 
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins: []string{application.Config.Frontend.BaseUrl},
+		AllowOrigins: []string{app.Config.Frontend.BaseUrl},
 		AllowMethods: []string{"DELETE", "GET", "OPTIONS", "POST"},
 		AllowHeaders: []string{
 			"Content-Type",
@@ -29,7 +29,7 @@ func Engine(application *core.App) *gin.Engine {
 	engine.DELETE("/signout", handlers.SignoutHandler)
 
 	authGroup := engine.Group("/auth/google")
-	handlers.RegisterAuthHandlers(authGroup, application)
+	handlers.RegisterAuthHandlers(authGroup, app)
 
 	return engine
 }

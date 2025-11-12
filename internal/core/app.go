@@ -16,13 +16,13 @@ type App struct {
 	database *sql.DB
 }
 
-func (application *App) Database() *sql.DB {
-	return application.database
+func (app *App) Database() *sql.DB {
+	return app.database
 }
 
-func (application *App) WithTransaction(c *gin.Context, f func(*sql.Tx) error) error {
+func (app *App) WithTransaction(c *gin.Context, f func(*sql.Tx) error) error {
 	ctx := context.WithoutCancel(c.Request.Context())
-	tx, err := application.Database().BeginTx(ctx, nil)
+	tx, err := app.Database().BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %s", err)
 	}

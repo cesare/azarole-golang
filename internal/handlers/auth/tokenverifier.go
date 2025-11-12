@@ -14,16 +14,16 @@ type IdTokenClaims struct {
 }
 
 type IdTokenVerifier struct {
-	application *core.App
-	token       string
-	nonce       string
+	app   *core.App
+	token string
+	nonce string
 }
 
-func NewIdTokenVerifier(application *core.App, token string, nonce string) *IdTokenVerifier {
+func NewIdTokenVerifier(app *core.App, token string, nonce string) *IdTokenVerifier {
 	return &IdTokenVerifier{
-		application: application,
-		token:       token,
-		nonce:       nonce,
+		app:   app,
+		token: token,
+		nonce: nonce,
 	}
 }
 

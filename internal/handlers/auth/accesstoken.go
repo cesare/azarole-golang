@@ -10,22 +10,22 @@ import (
 )
 
 type AccessTokenRequest struct {
-	appplication *core.App
+	app *core.App
 }
 
 type AccessTokenResponse struct {
 	IdToken string `json:"id_token" binding:"required"`
 }
 
-func NewAccessTokenRequest(application *core.App) *AccessTokenRequest {
+func NewAccessTokenRequest(app *core.App) *AccessTokenRequest {
 	return &AccessTokenRequest{
-		appplication: application,
+		app: app,
 	}
 }
 
 func (request *AccessTokenRequest) Execute(code string) (*AccessTokenResponse, error) {
-	config := request.appplication.Config
-	secrets := request.appplication.Secrets
+	config := request.app.Config
+	secrets := request.app.Secrets
 
 	params := url.Values{}
 	params.Set("client_id", secrets.GoogleAuth.ClientId)

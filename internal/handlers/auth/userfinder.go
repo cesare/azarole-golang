@@ -15,21 +15,21 @@ type FinderResult struct {
 }
 
 type UserFinder struct {
-	application *core.App
-	identifier  string
+	app        *core.App
+	identifier string
 }
 
-func NewUserFinder(application *core.App, identifier string) *UserFinder {
+func NewUserFinder(app *core.App, identifier string) *UserFinder {
 	return &UserFinder{
-		application: application,
-		identifier:  identifier,
+		app:        app,
+		identifier: identifier,
 	}
 }
 
 func (finder *UserFinder) Execute(c *gin.Context) (*FinderResult, error) {
 	var result FinderResult
 
-	err := finder.application.WithTransaction(c, func(tx *sql.Tx) error {
+	err := finder.app.WithTransaction(c, func(tx *sql.Tx) error {
 		r, err := finder.findUserId(tx)
 		if err != nil {
 			return err

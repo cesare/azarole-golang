@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterAuthHandlers(group *gin.RouterGroup, application *core.App) {
+func RegisterAuthHandlers(group *gin.RouterGroup, app *core.App) {
 	group.POST("", func(c *gin.Context) {
-		generator := auth.NewAuthorizationRequestGenerator(application)
+		generator := auth.NewAuthorizationRequestGenerator(app)
 		authRequest := generator.Generate()
 
 		session := sessions.Default(c)
@@ -49,11 +49,11 @@ func RegisterAuthHandlers(group *gin.RouterGroup, application *core.App) {
 			return
 		}
 
-		handleSuccess(c, application, params.Code, params.State)
+		handleSuccess(c, app, params.Code, params.State)
 	})
 }
 
-func handleSuccess(c *gin.Context, application *core.App, code string, state string) {
+func handleSuccess(c *gin.Context, app *core.App, code string, state string) {
 	session := sessions.Default(c)
 	savedState, _ := session.Get("google-auth-state").(string)
 	savedNonce, _ := session.Get("google-auth-nonce").(string)
@@ -67,7 +67,7 @@ func handleSuccess(c *gin.Context, application *core.App, code string, state str
 		return
 	}
 
-	accessTokenRequest := auth.NewAccessTokenRequest(application)
+	accessTokenRequest := auth.NewAccessTokenRequest(app)
 	accessTokenResponse, err := accessTokenRequest.Execute(code)
 	if err != nil {
 		slog.Debug("accessTokenRequest failed", "error", err)
@@ -75,7 +75,7 @@ func handleSuccess(c *gin.Context, application *core.App, code string, state str
 		return
 	}
 
-	verifier := auth.NewIdTokenVerifier(application, accessTokenResponse.IdToken, savedNonce)
+	verifier := auth.NewIdTokenVerifier(app, accessTokenResponse.IdToken, savedNonce)
 	claims, err := verifier.Verify()
 	if err != nil {
 		slog.Debug("verifier failed", "error", err)
@@ -83,7 +83,7 @@ func handleSuccess(c *gin.Context, application *core.App, code string, state str
 		return
 	}
 
-	finder := auth.NewUserFinder(application, claims.Subject)
+	finder := auth.NewUserFinder(app, claims.Subject)
 	result, err := finder.Execute(c)
 	if err != nil {
 		slog.Debug("finder failed", "error", err)

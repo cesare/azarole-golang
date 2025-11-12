@@ -14,12 +14,12 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationRequestGenerator struct {
-	application *core.App
+	app *core.App
 }
 
-func NewAuthorizationRequestGenerator(application *core.App) *AuthorizationRequestGenerator {
+func NewAuthorizationRequestGenerator(app *core.App) *AuthorizationRequestGenerator {
 	return &AuthorizationRequestGenerator{
-		application: application,
+		app: app,
 	}
 }
 
@@ -43,8 +43,8 @@ func (generator *AuthorizationRequestGenerator) generateRandomString() string {
 }
 
 func (generator *AuthorizationRequestGenerator) generateRequestUrl(state string, nonce string) string {
-	clientId := generator.application.Secrets.GoogleAuth.ClientId
-	redirectkUrl := generator.application.Config.Frontend.AuthRedirectUrl()
+	clientId := generator.app.Secrets.GoogleAuth.ClientId
+	redirectkUrl := generator.app.Config.Frontend.AuthRedirectUrl()
 
 	params := url.Values{}
 	params.Set("client_id", clientId)

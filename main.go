@@ -30,14 +30,14 @@ func setupLogger() {
 
 func main() {
 	args := newArguments()
-	application, err := core.LoadApp(args.configPath)
+	app, err := core.LoadApp(args.configPath)
 	if err != nil {
-		slog.Error("Failed to load application", "error", err)
+		slog.Error("Failed to load app", "error", err)
 		os.Exit(111)
 	}
 
 	setupLogger()
 
-	engine := server.Engine(application)
-	engine.Run(application.Config.Server.BindAddress())
+	engine := server.Engine(app)
+	engine.Run(app.Config.Server.BindAddress())
 }
