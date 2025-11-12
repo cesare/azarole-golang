@@ -9,18 +9,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Application struct {
+type App struct {
 	Config  *Config
 	Secrets *Secrets
 
 	database *sql.DB
 }
 
-func (application *Application) Database() *sql.DB {
+func (application *App) Database() *sql.DB {
 	return application.database
 }
 
-func (application *Application) WithTransaction(c *gin.Context, f func(*sql.Tx) error) error {
+func (application *App) WithTransaction(c *gin.Context, f func(*sql.Tx) error) error {
 	ctx := context.WithoutCancel(c.Request.Context())
 	tx, err := application.Database().BeginTx(ctx, nil)
 	if err != nil {
@@ -45,7 +45,7 @@ func (application *Application) WithTransaction(c *gin.Context, f func(*sql.Tx) 
 	return err
 }
 
-func LoadApplication(configPath string) (*Application, error) {
+func LoadApp(configPath string) (*App, error) {
 	config, err := LoadConfig(configPath)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func LoadApplication(configPath string) (*Application, error) {
 		return nil, fmt.Errorf("failed to open database connection: %s", err)
 	}
 
-	app := Application{
+	app := App{
 		Config:   config,
 		Secrets:  secrets,
 		database: db,

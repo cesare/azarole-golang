@@ -15,11 +15,11 @@ type FinderResult struct {
 }
 
 type UserFinder struct {
-	application *core.Application
+	application *core.App
 	identifier  string
 }
 
-func NewUserFinder(application *core.Application, identifier string) *UserFinder {
+func NewUserFinder(application *core.App, identifier string) *UserFinder {
 	return &UserFinder{
 		application: application,
 		identifier:  identifier,

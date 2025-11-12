@@ -10,14 +10,14 @@ import (
 )
 
 type AccessTokenRequest struct {
-	appplication *core.Application
+	appplication *core.App
 }
 
 type AccessTokenResponse struct {
 	IdToken string `json:"id_token" binding:"required"`
 }
 
-func NewAccessTokenRequest(application *core.Application) *AccessTokenRequest {
+func NewAccessTokenRequest(application *core.App) *AccessTokenRequest {
 	return &AccessTokenRequest{
 		appplication: application,
 	}

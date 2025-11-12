@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Engine(application *core.Application) *gin.Engine {
+func Engine(application *core.App) *gin.Engine {
 	engine := gin.Default()
 
 	store := cookie.NewStore(application.Secrets.Session.SessionKey.Bytes())

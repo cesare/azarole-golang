@@ -14,10 +14,10 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationRequestGenerator struct {
-	application *core.Application
+	application *core.App
 }
 
-func NewAuthorizationRequestGenerator(application *core.Application) *AuthorizationRequestGenerator {
+func NewAuthorizationRequestGenerator(application *core.App) *AuthorizationRequestGenerator {
 	return &AuthorizationRequestGenerator{
 		application: application,
 	}

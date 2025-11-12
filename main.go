@@ -30,7 +30,7 @@ func setupLogger() {
 
 func main() {
 	args := newArguments()
-	application, err := core.LoadApplication(args.configPath)
+	application, err := core.LoadApp(args.configPath)
 	if err != nil {
 		slog.Error("Failed to load application", "error", err)
 		os.Exit(111)
