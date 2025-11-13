@@ -3,6 +3,7 @@ package server
 import (
 	"azarole/internal/core"
 	"azarole/internal/handlers"
+	"azarole/internal/middlewares"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
@@ -27,6 +28,7 @@ func Engine(app *core.App) *gin.Engine {
 
 	engine.GET("/ping", handlers.PingHandler)
 	engine.DELETE("/signout", handlers.SignoutHandler)
+	engine.GET("/current_user", middlewares.RequireSignin(app), handlers.CurrentUserHandler)
 
 	authGroup := engine.Group("/auth/google")
 	handlers.RegisterAuthHandlers(authGroup, app)
