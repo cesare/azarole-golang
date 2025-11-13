@@ -3,6 +3,7 @@ package handlers
 import (
 	"azarole/internal/core"
 	"azarole/internal/handlers/auth"
+	"azarole/internal/views"
 	"log/slog"
 	"net/http"
 
@@ -91,10 +92,18 @@ func handleSuccess(c *gin.Context, app *core.App, code string, state string) {
 		return
 	}
 
-	session.Set("userId", result.UserId)
-	session.Save()
+	session.Set("userId", uint32(result.UserId))
+	err = session.Save()
+	if err != nil {
+		slog.Debug("failed to save session", "error", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 
+	userView := views.UserView{
+		Id: result.UserId,
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"user_id": result.UserId,
+		"user": userView,
 	})
 }
