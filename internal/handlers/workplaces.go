@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,10 @@ func fromWorkplace(wp *models.Workplace) *WorkplaceView {
 		Id:   wp.Id,
 		Name: wp.Name,
 	}
+}
+
+type createWorkplaceParams struct {
+	Name string `form:"name" binding:"required"`
 }
 
 func RegisterWorkplacesHandlers(group *gin.RouterGroup, app *core.App) {
@@ -39,6 +44,30 @@ func RegisterWorkplacesHandlers(group *gin.RouterGroup, app *core.App) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"workplaces": views,
+		})
+	})
+
+	group.POST("", func(c *gin.Context) {
+		currentUser := c.MustGet("currentUser").(models.User)
+
+		var params createWorkplaceParams
+		err := c.ShouldBind(&params)
+		if err != nil {
+			slog.Debug("failed to bind parameters", "error", err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		workplace, err := createWorkplace(app, &currentUser, params.Name)
+		if err != nil {
+			slog.Debug("failed to create workplace", "error", err)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		view := fromWorkplace(workplace)
+		c.JSON(http.StatusCreated, gin.H{
+			"workplace": view,
 		})
 	})
 }
@@ -67,4 +96,31 @@ func findWorkplaces(app *core.App, user *models.User) ([]models.Workplace, error
 	}
 
 	return workplaces, nil
+}
+
+func createWorkplace(app *core.App, user *models.User, name string) (*models.Workplace, error) {
+	statement, err := app.Database().Prepare("insert into workplaces (user_id, name, created_at, updated_at) values ($1, $2, $3, $4) returning id, user_id, name")
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare statement for createWorkplace: %s", err)
+	}
+	defer statement.Close()
+
+	now := time.Now().UTC()
+	rows, err := statement.Query(user.Id, name, now, now)
+	if err != nil {
+		return nil, fmt.Errorf("query for createWorkplace failed: %s", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, fmt.Errorf("inserted row missing")
+	}
+
+	var workplace models.Workplace
+	err = rows.Scan(&workplace.Id, &workplace.UserId, &workplace.Name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to map row into workplace: %s", err)
+	}
+
+	return &workplace, nil
 }
