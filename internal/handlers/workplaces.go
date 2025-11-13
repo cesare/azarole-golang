@@ -4,6 +4,7 @@ import (
 	"azarole/internal/core"
 	"azarole/internal/models"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ func RegisterWorkplacesHandlers(group *gin.RouterGroup, app *core.App) {
 		currentUser := c.MustGet("currentUser").(models.User)
 		workplaces, err := findWorkplaces(app, &currentUser)
 		if err != nil {
+			slog.Debug("failed to find workplaces", "error", err)
 			c.Status(http.StatusInternalServerError)
 			return
 		}
@@ -56,7 +58,7 @@ func findWorkplaces(app *core.App, user *models.User) ([]models.Workplace, error
 	workplaces := []models.Workplace{}
 	for rows.Next() {
 		var wp models.Workplace
-		err = rows.Scan(&wp)
+		err = rows.Scan(&wp.Id, &wp.UserId, &wp.Name)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map row into workplace: %s", err)
 		}
