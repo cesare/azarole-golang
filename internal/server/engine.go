@@ -33,5 +33,9 @@ func Engine(app *core.App) *gin.Engine {
 	authGroup := engine.Group("/auth/google")
 	handlers.RegisterAuthHandlers(authGroup, app)
 
+	workplacesGroup := engine.Group("/workplaces")
+	workplacesGroup.Use(middlewares.RequireSignin(app))
+	handlers.RegisterWorkplacesHandlers(workplacesGroup, app)
+
 	return engine
 }
