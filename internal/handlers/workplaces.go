@@ -83,6 +83,7 @@ func findWorkplaces(app *core.App, user *models.User) ([]models.Workplace, error
 	if err != nil {
 		return nil, fmt.Errorf("query for findWorkplaces failed: %s", err)
 	}
+	defer rows.Close()
 
 	workplaces := []models.Workplace{}
 	for rows.Next() {
