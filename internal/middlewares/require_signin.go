@@ -13,23 +13,26 @@ import (
 func RequireSignin(app *core.App) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
-		userId, ok := session.Get("userId").(models.UserId)
+		userId, ok := session.Get("userId").(uint32)
 		if !ok {
 			c.Status(http.StatusUnauthorized)
+			c.Abort()
 			return
 		}
 
-		user, err := loadCurrentUser(app, userId)
+		user, err := loadCurrentUser(app, models.UserId(userId))
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
+			c.Abort()
 			return
 		}
 		if user == nil {
 			c.Status(http.StatusUnauthorized)
+			c.Abort()
 			return
 		}
 
-		c.Set("currentUser", user)
+		c.Set("currentUser", *user)
 		c.Next()
 	}
 }
