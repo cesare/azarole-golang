@@ -27,7 +27,7 @@ func (b64 *b64string) UnmarshalText(text []byte) error {
 }
 
 type ApiKeyConfig struct {
-	DigestingSecretKey string `env:"API_KEY_DIGESTING_SECRET_KEY,required"`
+	DigestingSecretKey b64string `env:"API_KEY_DIGESTING_SECRET_KEY,required"`
 }
 
 func loadApiKey() (*ApiKeyConfig, error) {
