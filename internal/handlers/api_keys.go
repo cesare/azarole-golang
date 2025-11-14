@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"azarole/internal/core"
+	apikeys "azarole/internal/handlers/api_keys"
 	"azarole/internal/models"
 	"azarole/internal/views"
 	"fmt"
@@ -10,6 +11,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type createApiKeyParams struct {
+	Name string `form:"name" binding:"required"`
+}
 
 func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 	group.GET("", func(c *gin.Context) {
@@ -30,6 +35,28 @@ func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 		c.JSON(http.StatusOK, gin.H{
 			"api_keys": ks, // TODO: fix key into camelCase
 		})
+	})
+
+	group.POST("", func(c *gin.Context) {
+		currentUser := c.MustGet("currentUser").(models.User)
+
+		var params createApiKeyParams
+		err := c.ShouldBind(&params)
+		if err != nil {
+			slog.Debug("failed to bind createApiKeyParams", "error", err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		registration := apikeys.NewApiKeyRegistration(app, &currentUser, params.Name)
+		details, err := registration.Execute()
+		if err != nil {
+			slog.Debug("api key registration failed", "error", err)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		c.JSON(http.StatusCreated, details)
 	})
 }
 
