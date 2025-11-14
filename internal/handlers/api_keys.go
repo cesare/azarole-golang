@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,6 +61,22 @@ func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 			"api_key": details, // TODO fix key into camelCase
 		})
 	})
+
+	group.DELETE("/:id", func(c *gin.Context) {
+		currentUser := c.MustGet("currentUser").(models.User)
+
+		v := c.Param("id")
+		uintValue, err := strconv.ParseUint(v, 10, 32)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		apiKeyId := models.ApiKeyId(uint32(uintValue))
+		deleteApiKey(app, &currentUser, apiKeyId)
+
+		c.Status(http.StatusOK)
+	})
 }
 
 func findApiKeys(app *core.App, user *models.User) ([]models.ApiKey, error) {
@@ -87,4 +104,19 @@ func findApiKeys(app *core.App, user *models.User) ([]models.ApiKey, error) {
 	}
 
 	return apiKeys, nil
+}
+
+func deleteApiKey(app *core.App, user *models.User, apiKeyId models.ApiKeyId) error {
+	statement, err := app.Database().Prepare("delete from api_keys where user_id = $1 and id = $2")
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement for deleteApiKey: %s", err)
+	}
+	defer statement.Close()
+
+	_, err = statement.Exec(user.Id, apiKeyId)
+	if err != nil {
+		return fmt.Errorf("failed to delete api key: %s", err)
+	}
+
+	return nil
 }
