@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -66,13 +65,12 @@ func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 		currentUser := c.MustGet("currentUser").(models.User)
 
 		v := c.Param("id")
-		uintValue, err := strconv.ParseUint(v, 10, 32)
+		apiKeyId, err := models.FromStringToApiKeyId(v)
 		if err != nil {
 			c.Status(http.StatusNotFound)
 			return
 		}
 
-		apiKeyId := models.ApiKeyId(uint32(uintValue))
 		deleteApiKey(app, &currentUser, apiKeyId)
 
 		c.Status(http.StatusOK)
