@@ -3,6 +3,7 @@ package server
 import (
 	"azarole/internal/core"
 	"azarole/internal/handlers"
+	"azarole/internal/handlers/api"
 	"azarole/internal/middlewares"
 
 	"github.com/gin-contrib/cors"
@@ -40,6 +41,10 @@ func Engine(app *core.App) *gin.Engine {
 	workplacesGroup := engine.Group("/workplaces")
 	workplacesGroup.Use(middlewares.RequireSignin(app))
 	handlers.RegisterWorkplacesHandlers(workplacesGroup, app)
+
+	apiGroup := engine.Group("/api")
+	apiGroup.Use(middlewares.RequireApiKey(app))
+	api.RegisterAttendanceRecordsHandlers(apiGroup, app)
 
 	return engine
 }
