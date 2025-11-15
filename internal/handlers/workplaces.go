@@ -3,6 +3,7 @@ package handlers
 import (
 	"azarole/internal/core"
 	"azarole/internal/models"
+	"azarole/internal/views"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,18 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-type WorkplaceView struct {
-	Id   models.WorkplaceId `json:"id"`
-	Name string             `json:"name"`
-}
-
-func fromWorkplace(wp *models.Workplace) *WorkplaceView {
-	return &WorkplaceView{
-		Id:   wp.Id,
-		Name: wp.Name,
-	}
-}
 
 type createWorkplaceParams struct {
 	Name string `form:"name" binding:"required"`
@@ -37,13 +26,13 @@ func RegisterWorkplacesHandlers(group *gin.RouterGroup, app *core.App) {
 			return
 		}
 
-		views := []WorkplaceView{}
+		vs := []views.WorkplaceView{}
 		for _, wp := range workplaces {
-			views = append(views, *fromWorkplace(&wp))
+			vs = append(vs, *views.FromWorkplace(&wp))
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"workplaces": views,
+			"workplaces": vs,
 		})
 	})
 
@@ -65,7 +54,7 @@ func RegisterWorkplacesHandlers(group *gin.RouterGroup, app *core.App) {
 			return
 		}
 
-		view := fromWorkplace(workplace)
+		view := views.FromWorkplace(workplace)
 		c.JSON(http.StatusCreated, gin.H{
 			"workplace": view,
 		})
