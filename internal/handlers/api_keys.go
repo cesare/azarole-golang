@@ -4,8 +4,8 @@ import (
 	"azarole/internal/core"
 	apikeys "azarole/internal/handlers/api_keys"
 	"azarole/internal/models"
+	"azarole/internal/resources"
 	"azarole/internal/views"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -19,7 +19,9 @@ type createApiKeyParams struct {
 func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 	group.GET("", func(c *gin.Context) {
 		currentUser := c.MustGet("currentUser").(models.User)
-		apiKeys, err := findApiKeys(app, &currentUser)
+
+		rs := resources.NewApiKeyResources(app, &currentUser)
+		apiKeys, err := rs.List()
 		if err != nil {
 			slog.Debug("failed to find apiKeys", "error", err)
 			c.Status(http.StatusInternalServerError)
@@ -71,50 +73,9 @@ func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 			return
 		}
 
-		deleteApiKey(app, &currentUser, apiKeyId)
+		rs := resources.NewApiKeyResources(app, &currentUser)
+		rs.Delete(apiKeyId)
 
 		c.Status(http.StatusOK)
 	})
-}
-
-func findApiKeys(app *core.App, user *models.User) ([]models.ApiKey, error) {
-	statement, err := app.Database().Prepare("select id, user_id, name, digest, created_at from api_keys where user_id = $1 order by created_at desc")
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statement for findApiKeys: %s", err)
-	}
-	defer statement.Close()
-
-	rows, err := statement.Query(user.Id)
-	if err != nil {
-		return nil, fmt.Errorf("query for findApiKeys failed: %s", err)
-	}
-	defer rows.Close()
-
-	apiKeys := []models.ApiKey{}
-	for rows.Next() {
-		var apiKey models.ApiKey
-		err = rows.Scan(&apiKey.Id, &apiKey.UserId, &apiKey.Name, &apiKey.Digest, &apiKey.CreatedAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to map row into apiKey: %s", err)
-		}
-
-		apiKeys = append(apiKeys, apiKey)
-	}
-
-	return apiKeys, nil
-}
-
-func deleteApiKey(app *core.App, user *models.User, apiKeyId models.ApiKeyId) error {
-	statement, err := app.Database().Prepare("delete from api_keys where user_id = $1 and id = $2")
-	if err != nil {
-		return fmt.Errorf("failed to prepare statement for deleteApiKey: %s", err)
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(user.Id, apiKeyId)
-	if err != nil {
-		return fmt.Errorf("failed to delete api key: %s", err)
-	}
-
-	return nil
 }
