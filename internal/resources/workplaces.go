@@ -72,3 +72,24 @@ func (r *WorkplaceResources) Create(name string) (*models.Workplace, error) {
 
 	return &workplace, nil
 }
+
+func (r *WorkplaceResources) Find(id models.WorkplaceId) (*models.Workplace, error) {
+	statement, err := r.app.Database().Prepare("select id, user_id, name from workplaces where user_id = $1 and id = $2")
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare statement for finding workplace: %s", err)
+	}
+	defer statement.Close()
+
+	row := statement.QueryRow(r.user.Id, id)
+	if row == nil {
+		return nil, fmt.Errorf("workplace not found")
+	}
+
+	var wp models.Workplace
+	err = row.Scan(&wp.Id, &wp.UserId, &wp.Name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to map row into workplace: %s", err)
+	}
+
+	return &wp, nil
+}
