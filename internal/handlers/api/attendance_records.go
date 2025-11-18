@@ -5,9 +5,7 @@ import (
 	"azarole/internal/models"
 	"azarole/internal/resources"
 	"azarole/internal/views"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +40,8 @@ func create(c *gin.Context, app *core.App, event models.AttendanceEvent) {
 		return
 	}
 
-	attendance, err := createAttendance(app, workplace, event)
+	ars := resources.NewAttendanceRecordResource(app, workplace)
+	attendance, err := ars.Create(event)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -52,29 +51,4 @@ func create(c *gin.Context, app *core.App, event models.AttendanceEvent) {
 	c.JSON(http.StatusCreated, gin.H{
 		"attendanceRecord": view,
 	})
-}
-
-func createAttendance(app *core.App, workplace *models.Workplace, event models.AttendanceEvent) (*models.AttendandeRecord, error) {
-	statement, err := app.Database().Prepare("insert into attendance_records (workplace_id, event, recorded_at, created_at) values ($1, $2, $3, $4) returning id, workplace_id, event, recorded_at")
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statement for findWorkplaces: %s", err)
-	}
-	defer statement.Close()
-
-	now := time.Now().UTC()
-	rows, err := statement.Query(workplace.Id, event, now, now)
-	if err != nil {
-		return nil, fmt.Errorf("query for creating attandance record failed: %s", err)
-	}
-	defer rows.Close()
-
-	rows.Next()
-
-	var ar models.AttendandeRecord
-	err = rows.Scan(&ar.Id, &ar.WorkplaceId, &ar.Event, &ar.RecordedAt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to map row into attendanceRecord: %s", err)
-	}
-
-	return &ar, nil
 }
