@@ -5,7 +5,6 @@ import (
 	"azarole/internal/models"
 	"azarole/internal/resources"
 	"azarole/internal/views"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -44,7 +43,8 @@ func RegisterAttendanceRecordsHandlers(group *gin.RouterGroup, app *core.App) {
 		}
 
 		targetMonth := params.ToTime()
-		attendances, err := listAttendances(app, workplace, targetMonth)
+		ars := resources.NewAttendanceRecordResource(app, workplace)
+		attendances, err := ars.List(targetMonth)
 		if err != nil {
 			slog.Debug("Failed to listing attendances", "error", err)
 			c.Status(http.StatusInternalServerError)
@@ -82,7 +82,8 @@ func RegisterAttendanceRecordsHandlers(group *gin.RouterGroup, app *core.App) {
 			return
 		}
 
-		err = deleteAttendance(app, workplace, path.Id)
+		ars := resources.NewAttendanceRecordResource(app, workplace)
+		err = ars.Delete(path.Id)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return
@@ -127,48 +128,7 @@ func (p *listingParams) ToTime() time.Time {
 	return time.Date(p.Year, time.Month(p.Month), 1, 0, 0, 0, 0, location)
 }
 
-func listAttendances(app *core.App, workplace *models.Workplace, month time.Time) ([]models.AttendandeRecord, error) {
-	statement, err := app.Database().Prepare("select id, workplace_id, event, recorded_at from attendance_records where workplace_id = $1 and recorded_at >= $2 and recorded_at < $3 order by recorded_at")
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statemnet for listAttendances: %s", err)
-	}
-	defer statement.Close()
-
-	rows, err := statement.Query(workplace.Id, month.UTC(), month.AddDate(0, 1, 0).UTC())
-	if err != nil {
-		return nil, fmt.Errorf("query failed: %s", err)
-	}
-	defer rows.Close()
-
-	as := []models.AttendandeRecord{}
-	for rows.Next() {
-		var a models.AttendandeRecord
-		err = rows.Scan(&a.Id, &a.WorkplaceId, &a.Event, &a.RecordedAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to map row into AttandanceRecord: %s", err)
-		}
-		as = append(as, a)
-	}
-
-	return as, nil
-}
-
 type deletingPath struct {
 	WorkplaceId models.WorkplaceId        `uri:"workplace_id"`
 	Id          models.AttendandeRecordId `uri:"id"`
-}
-
-func deleteAttendance(app *core.App, workplace *models.Workplace, id models.AttendandeRecordId) error {
-	statement, err := app.Database().Prepare("delete from attendance_records where id = $1 and workplace_id = $2")
-	if err != nil {
-		return fmt.Errorf("failed to prepare statement for deleteAttendance: %s", err)
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(id, workplace.Id)
-	if err != nil {
-		return fmt.Errorf("failed to delete attandance: %s", err)
-	}
-
-	return nil
 }
