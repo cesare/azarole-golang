@@ -42,6 +42,10 @@ func Engine(app *core.App) *gin.Engine {
 	workplacesGroup.Use(middlewares.RequireSignin(app))
 	handlers.RegisterWorkplacesHandlers(workplacesGroup, app)
 
+	attendancesGroup := engine.Group("/workplaces/:workplace_id/attendance_records")
+	attendancesGroup.Use(middlewares.RequireSignin(app))
+	handlers.RegisterAttendanceRecordsHandlers(attendancesGroup, app)
+
 	apiGroup := engine.Group("/api")
 	apiGroup.Use(middlewares.RequireApiKey(app))
 	api.RegisterAttendanceRecordsHandlers(apiGroup, app)
