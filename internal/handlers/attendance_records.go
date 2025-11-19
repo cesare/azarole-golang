@@ -78,6 +78,10 @@ func RegisterAttendanceRecordsHandlers(group *gin.RouterGroup, app *core.App) {
 		wrs := resources.NewWorkplaceResources(app, &currentUser)
 		workplace, err := wrs.Find(path.WorkplaceId)
 		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		if workplace == nil {
 			c.Status(http.StatusNotFound)
 			return
 		}
