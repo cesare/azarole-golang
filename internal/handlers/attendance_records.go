@@ -64,6 +64,32 @@ func RegisterAttendanceRecordsHandlers(group *gin.RouterGroup, app *core.App) {
 			"attendanceRecords": vs,
 		})
 	})
+
+	group.DELETE("/:id", func(c *gin.Context) {
+		currentUser := c.MustGet("currentUser").(models.User)
+
+		var path deletingPath
+		err := c.BindUri(&path)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		wrs := resources.NewWorkplaceResources(app, &currentUser)
+		workplace, err := wrs.Find(path.WorkplaceId)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		err = deleteAttendance(app, workplace, path.Id)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		c.Status(http.StatusOK)
+	})
 }
 
 type listingParams struct {
@@ -125,4 +151,24 @@ func listAttendances(app *core.App, workplace *models.Workplace, month time.Time
 	}
 
 	return as, nil
+}
+
+type deletingPath struct {
+	WorkplaceId models.WorkplaceId        `uri:"workplace_id"`
+	Id          models.AttendandeRecordId `uri:"id"`
+}
+
+func deleteAttendance(app *core.App, workplace *models.Workplace, id models.AttendandeRecordId) error {
+	statement, err := app.Database().Prepare("delete from attendance_records where id = $1 and workplace_id = $2")
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement for deleteAttendance: %s", err)
+	}
+	defer statement.Close()
+
+	_, err = statement.Exec(id, workplace.Id)
+	if err != nil {
+		return fmt.Errorf("failed to delete attandance: %s", err)
+	}
+
+	return nil
 }
