@@ -65,6 +65,11 @@ func RegisterAttendanceRecordsHandlers(group *gin.RouterGroup, app *core.App) {
 		})
 	})
 
+	type deletingPath struct {
+		WorkplaceId models.WorkplaceId        `uri:"workplace_id"`
+		Id          models.AttendandeRecordId `uri:"id"`
+	}
+
 	group.DELETE("/:id", func(c *gin.Context) {
 		currentUser := c.MustGet("currentUser").(models.User)
 
@@ -130,9 +135,4 @@ func (p *listingParams) ToTime() time.Time {
 	now := time.Now()
 	location := now.Location()
 	return time.Date(p.Year, time.Month(p.Month), 1, 0, 0, 0, 0, location)
-}
-
-type deletingPath struct {
-	WorkplaceId models.WorkplaceId        `uri:"workplace_id"`
-	Id          models.AttendandeRecordId `uri:"id"`
 }
