@@ -1,0 +1,31 @@
+name: golang-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./go.mod
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
+      - name: Install Dependencies
+        run: go mod download
+      - name: Build
+        run: go build
+      - name: Lint Code
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.6
