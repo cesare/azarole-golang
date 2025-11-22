@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -30,12 +31,18 @@ func (app *App) WithTransaction(c *gin.Context, f func(*sql.Tx) error) error {
 	defer func() {
 		p := recover()
 		if p != nil {
-			tx.Rollback()
+			e := tx.Rollback()
+			if e != nil {
+				slog.Error("rollback failed", "error", e)
+			}
 			panic(p)
 		}
 
 		if err != nil {
-			tx.Rollback()
+			e := tx.Rollback()
+			if e != nil {
+				slog.Error("rollback failed", "error", e)
+			}
 		} else {
 			err = tx.Commit()
 		}
