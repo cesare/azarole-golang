@@ -6,6 +6,8 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+
+	_ "time/tzdata"
 )
 
 type arguments struct {
