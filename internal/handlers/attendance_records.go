@@ -108,7 +108,8 @@ type listingParams struct {
 }
 
 func (p *listingParams) Normalize() *listingParams {
-	now := time.Now()
+	defaultLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
+	now := time.Now().In(defaultLocation)
 	year := p.Year
 	if year == 0 {
 		year = now.Year()
