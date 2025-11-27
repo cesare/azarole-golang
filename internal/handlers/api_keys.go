@@ -35,7 +35,7 @@ func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"api_keys": ks, // TODO: fix key into camelCase
+			"apiKeys": ks,
 		})
 	})
 
@@ -59,7 +59,7 @@ func RegisterApiKeysHandlers(group gin.RouterGroup, app *core.App) {
 		}
 
 		c.JSON(http.StatusCreated, gin.H{
-			"api_key": details, // TODO fix key into camelCase
+			"apiKey": details,
 		})
 	})
 
