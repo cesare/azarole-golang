@@ -1,10 +1,10 @@
 module azarole
 
-go 1.25.4
+go 1.26.0
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.8.1
-	github.com/caarlos0/env/v11 v11.4.1
+	github.com/caarlos0/env/v11 v11.4.2
 	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-gonic/gin v1.12.0
